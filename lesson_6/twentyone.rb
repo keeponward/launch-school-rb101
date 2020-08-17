@@ -1,7 +1,3 @@
-NUM_RANKS = 13
-NUM_SUITS = 4
-NUM_CARDS_IN_DECK = (NUM_RANKS * NUM_SUITS)
-
 CLUBS = 'clubs'
 DIAMONDS = 'diamonds'
 HEARTS = 'hearts'
