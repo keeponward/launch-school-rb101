@@ -40,7 +40,7 @@ def init_deck
       # Else if a face card (J, Q, or K)
       elsif rank <= 13
         value = FACE_CARD_VALUE
-      # Else and ace (A)
+      # Else if ace (A)
       else
         value = ACE_VALUE
       end
