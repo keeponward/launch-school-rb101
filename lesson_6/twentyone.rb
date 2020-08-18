@@ -7,8 +7,9 @@ SUITS = [CLUBS, DIAMONDS, HEARTS, SPADES]
 
 CARD_NAME = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 
-MAX_TOTAL_BEFORE_BUST = 21
-TOTAL_BELOW_WHICH_DEALER_MUST_HIT = 17
+BEST_HAND_TOTAL = 21
+DEALER_STAY_TOTAL = 17
+
 NUM_POINTS_TO_WIN = 5
 
 FACE_CARD_VALUE = 10
@@ -110,10 +111,10 @@ end
 def get_hand_total(hand)
   hand_total = hand.reduce(0) { |total, card| total + card[:value] }
 
-  if hand_total > MAX_TOTAL_BEFORE_BUST
+  if hand_total > BEST_HAND_TOTAL
     aces_arr = hand.select { |card| card[:value] == ACE_VALUE }
     num_aces = aces_arr.size
-    while num_aces > 0 && hand_total > MAX_TOTAL_BEFORE_BUST
+    while (num_aces > 0) && (hand_total > BEST_HAND_TOTAL)
       hand_total -= 10
       num_aces -= 1
     end
@@ -136,16 +137,16 @@ def complete_players_hand(player_hand, deck)
 
       hand_total += player_hand.last[:value]
 
-      # If new hand total exceeds max and if any aces are present in the hand
-      if (hand_total > MAX_TOTAL_BEFORE_BUST) && 
-          player_hand.any? { |card| card[:value] == ACE_VALUE }
-          # Sum up all the player cards (and treat aces)
-          hand_total = get_hand_total(player_hand)
+      # If new hand total exceeds best possible total and if any aces are present
+      if (hand_total > BEST_HAND_TOTAL) &&
+         player_hand.any? { |card| card[:value] == ACE_VALUE }
+        # Sum up all the player cards (and treat aces)
+        hand_total = get_hand_total(player_hand)
       end
     end
-    break if player_action == 's' || (hand_total > MAX_TOTAL_BEFORE_BUST)
+    break if player_action == 's' || (hand_total > BEST_HAND_TOTAL)
   end
-   hand_total
+  hand_total
 end
 
 def complete_dealers_hand(dealer_hand, deck)
@@ -155,7 +156,7 @@ def complete_dealers_hand(dealer_hand, deck)
 
   hand_total = get_hand_total(dealer_hand)
 
-  while hand_total < TOTAL_BELOW_WHICH_DEALER_MUST_HIT
+  while hand_total < DEALER_STAY_TOTAL
     prompt "Dealer takes a card: "
     dealer_hand << deal_card!(deck)
 
@@ -163,11 +164,11 @@ def complete_dealers_hand(dealer_hand, deck)
 
     hand_total += dealer_hand.last[:value]
 
-    # If new hand total exceeds max and if any aces are present in the hand
-    if (hand_total > MAX_TOTAL_BEFORE_BUST) && 
-        dealer_hand.any? { |card| card[:value] == ACE_VALUE }
-        # Sum up all the player cards (and treat aces)
-        hand_total = get_hand_total(dealer_hand)
+    # If new hand total exceeds best possible total and if any aces are present
+    if (hand_total > BEST_HAND_TOTAL) &&
+       dealer_hand.any? { |card| card[:value] == ACE_VALUE }
+      # Sum up all the player cards (and treat aces)
+      hand_total = get_hand_total(dealer_hand)
     end
   end
   hand_total
@@ -209,7 +210,7 @@ loop do
     hand_result = 'unresolved'
 
     # Dealer wins if player busted
-    if player_total > MAX_TOTAL_BEFORE_BUST
+    if player_total > BEST_HAND_TOTAL
       prompt("Player busted (hand total: #{player_total})")
       hand_result = 'Dealer wins'
     else
@@ -217,7 +218,7 @@ loop do
       dealer_total = complete_dealers_hand(dealer_hand, deck)
 
       # Player wins if dealer busted
-      if dealer_total > MAX_TOTAL_BEFORE_BUST
+      if dealer_total > BEST_HAND_TOTAL
         prompt("Dealer busted (hand total: #{dealer_total})")
         hand_result = 'Player wins'
       end
@@ -269,106 +270,151 @@ prompt("Thanks for playing! Good bye!")
 # New group of hands
 
 # New hand
-# => Dealer's up card: Tc
-# => Player's hand: As Ah 
+# => Dealer's up card: 5s
+# => Player's hand: 3h Ah 
 # => Player's turn: 
 # => Do you want to hit or stay ('h' or 's')?
 # h
-# => Player's hand: As Ah 9d 
+# => Player's hand: 3h Ah 7c 
 # => Do you want to hit or stay ('h' or 's')?
 # s
 # => Dealer's turn: 
-# => Dealer's hand: Tc Jh 
-# => Dealer hand total: 20
-# => Player hand total: 21
+# => Dealer's hand: 5s 5h 
+# => Dealer takes a card: 
+# => Dealer's hand: 5s 5h 6h 
+# => Dealer takes a card: 
+# => Dealer's hand: 5s 5h 6h 8s 
+# => Dealer busted (hand total: 24)
 # => Player wins
 # => Group wins: dealer = 0. player = 1
 
 # New hand
-# => Dealer's up card: Td
-# => Player's hand: 4s As 
+# => Dealer's up card: Kh
+# => Player's hand: 8d 2d 
 # => Player's turn: 
 # => Do you want to hit or stay ('h' or 's')?
 # h
-# => Player's hand: 4s As 6c 
+# => Player's hand: 8d 2d Ks 
 # => Do you want to hit or stay ('h' or 's')?
 # s
 # => Dealer's turn: 
-# => Dealer's hand: Td 7d 
+# => Dealer's hand: Kh Jh 
+# => Dealer hand total: 20
+# => Player hand total: 20
+# => It's a tie
+# => Group wins: dealer = 0. player = 1
+
+# New hand
+# => Dealer's up card: 3c
+# => Player's hand: Ac 2d 
+# => Player's turn: 
+# => Do you want to hit or stay ('h' or 's')?
+# h
+# => Player's hand: Ac 2d As 
+# => Do you want to hit or stay ('h' or 's')?
+# h
+# => Player's hand: Ac 2d As 3s 
+# => Do you want to hit or stay ('h' or 's')?
+# h
+# => Player's hand: Ac 2d As 3s Ks 
+# => Do you want to hit or stay ('h' or 's')?
+# s
+# => Dealer's turn: 
+# => Dealer's hand: 3c 4h 
+# => Dealer takes a card: 
+# => Dealer's hand: 3c 4h Qh 
 # => Dealer hand total: 17
-# => Player hand total: 21
-# => Player wins
-# => Group wins: dealer = 0. player = 2
+# => Player hand total: 17
+# => It's a tie
+# => Group wins: dealer = 0. player = 1
 
 # New hand
-# => Dealer's up card: Kh
-# => Player's hand: 3s Kc 
+# => Dealer's up card: 5c
+# => Player's hand: Qh 5s 
 # => Player's turn: 
 # => Do you want to hit or stay ('h' or 's')?
-# h
-# => Player's hand: 3s Kc Qc 
-# => Player busted (hand total: 23)
+# s
+# => Dealer's turn: 
+# => Dealer's hand: 5c 3h 
+# => Dealer takes a card: 
+# => Dealer's hand: 5c 3h 3s 
+# => Dealer takes a card: 
+# => Dealer's hand: 5c 3h 3s 2c 
+# => Dealer takes a card: 
+# => Dealer's hand: 5c 3h 3s 2c 8s 
+# => Dealer hand total: 21
+# => Player hand total: 15
 # => Dealer wins
-# => Group wins: dealer = 1. player = 2
+# => Group wins: dealer = 1. player = 1
 
 # New hand
-# => Dealer's up card: 8h
-# => Player's hand: 5d 7d 
+# => Dealer's up card: Ad
+# => Player's hand: 6h Td 
 # => Player's turn: 
 # => Do you want to hit or stay ('h' or 's')?
 # h
-# => Player's hand: 5d 7d Kc 
+# => Player's hand: 6h Td As 
+# => Do you want to hit or stay ('h' or 's')?
+# s
+# => Dealer's turn: 
+# => Dealer's hand: Ad Qd 
+# => Dealer hand total: 21
+# => Player hand total: 17
+# => Dealer wins
+# => Group wins: dealer = 2. player = 1
+
+# New hand
+# => Dealer's up card: Ah
+# => Player's hand: 3s Th 
+# => Player's turn: 
+# => Do you want to hit or stay ('h' or 's')?
+# h
+# => Player's hand: 3s Th 9d 
 # => Player busted (hand total: 22)
 # => Dealer wins
-# => Group wins: dealer = 2. player = 2
+# => Group wins: dealer = 3. player = 1
 
 # New hand
-# => Dealer's up card: Qc
-# => Player's hand: 9h 7s 
+# => Dealer's up card: 7s
+# => Player's hand: Tc 2h 
 # => Player's turn: 
 # => Do you want to hit or stay ('h' or 's')?
 # h
-# => Player's hand: 9h 7s Qd 
-# => Player busted (hand total: 26)
-# => Dealer wins
+# => Player's hand: Tc 2h 8d 
+# => Do you want to hit or stay ('h' or 's')?
+# s
+# => Dealer's turn: 
+# => Dealer's hand: 7s Kh 
+# => Dealer hand total: 17
+# => Player hand total: 20
+# => Player wins
 # => Group wins: dealer = 3. player = 2
 
 # New hand
-# => Dealer's up card: 9c
-# => Player's hand: Ac 6h 
+# => Dealer's up card: 2s
+# => Player's hand: Tc 5c 
 # => Player's turn: 
-# => Do you want to hit or stay ('h' or 's')?
-# h
-# => Player's hand: Ac 6h 5c 
-# => Do you want to hit or stay ('h' or 's')?
-# h
-# => Player's hand: Ac 6h 5c 7c 
 # => Do you want to hit or stay ('h' or 's')?
 # s
 # => Dealer's turn: 
-# => Dealer's hand: 9c 3c 
+# => Dealer's hand: 2s 2c 
 # => Dealer takes a card: 
-# => Dealer's hand: 9c 3c 9s 
+# => Dealer's hand: 2s 2c 7h 
+# => Dealer takes a card: 
+# => Dealer's hand: 2s 2c 7h Jh 
 # => Dealer hand total: 21
-# => Player hand total: 19
+# => Player hand total: 15
 # => Dealer wins
 # => Group wins: dealer = 4. player = 2
 
 # New hand
-# => Dealer's up card: 4c
-# => Player's hand: 3c 4d 
+# => Dealer's up card: 2s
+# => Player's hand: 6s 8h 
 # => Player's turn: 
 # => Do you want to hit or stay ('h' or 's')?
 # h
-# => Player's hand: 3c 4d Qd 
-# => Do you want to hit or stay ('h' or 's')?
-# s
-# => Dealer's turn: 
-# => Dealer's hand: 4c 3h 
-# => Dealer takes a card: 
-# => Dealer's hand: 4c 3h As 
-# => Dealer hand total: 18
-# => Player hand total: 17
+# => Player's hand: 6s 8h 8d 
+# => Player busted (hand total: 22)
 # => Dealer wins
 # => Group wins: dealer = 5. player = 2
 # => Dealer wins the group of hands
@@ -378,106 +424,158 @@ prompt("Thanks for playing! Good bye!")
 # New group of hands
 
 # New hand
-# => Dealer's up card: Ts
-# => Player's hand: Qd 4s 
+# => Dealer's up card: 7s
+# => Player's hand: Ac Ah 
 # => Player's turn: 
 # => Do you want to hit or stay ('h' or 's')?
 # h
-# => Player's hand: Qd 4s 5s 
+# => Player's hand: Ac Ah 8d 
 # => Do you want to hit or stay ('h' or 's')?
 # s
 # => Dealer's turn: 
-# => Dealer's hand: Ts 9h 
+# => Dealer's hand: 7s Qc 
+# => Dealer hand total: 17
+# => Player hand total: 20
+# => Player wins
+# => Group wins: dealer = 0. player = 1
+
+# New hand
+# => Dealer's up card: 8s
+# => Player's hand: Ad 8d 
+# => Player's turn: 
+# => Do you want to hit or stay ('h' or 's')?
+# s
+# => Dealer's turn: 
+# => Dealer's hand: 8s Th 
+# => Dealer hand total: 18
+# => Player hand total: 19
+# => Player wins
+# => Group wins: dealer = 0. player = 2
+
+# New hand
+# => Dealer's up card: 4h
+# => Player's hand: 6h 6d 
+# => Player's turn: 
+# => Do you want to hit or stay ('h' or 's')?
+# h
+# => Player's hand: 6h 6d Tc 
+# => Player busted (hand total: 22)
+# => Dealer wins
+# => Group wins: dealer = 1. player = 2
+
+# New hand
+# => Dealer's up card: As
+# => Player's hand: 9d 5d 
+# => Player's turn: 
+# => Do you want to hit or stay ('h' or 's')?
+# h
+# => Player's hand: 9d 5d 4s 
+# => Do you want to hit or stay ('h' or 's')?
+# s
+# => Dealer's turn: 
+# => Dealer's hand: As Qs 
+# => Dealer hand total: 21
+# => Player hand total: 18
+# => Dealer wins
+# => Group wins: dealer = 2. player = 2
+
+# New hand
+# => Dealer's up card: 2s
+# => Player's hand: 7d 3c 
+# => Player's turn: 
+# => Do you want to hit or stay ('h' or 's')?
+# h
+# => Player's hand: 7d 3c 9h 
+# => Do you want to hit or stay ('h' or 's')?
+# s
+# => Dealer's turn: 
+# => Dealer's hand: 2s 7h 
+# => Dealer takes a card: 
+# => Dealer's hand: 2s 7h Qc 
 # => Dealer hand total: 19
 # => Player hand total: 19
 # => It's a tie
-# => Group wins: dealer = 0. player = 0
-
-# New hand
-# => Dealer's up card: 7c
-# => Player's hand: Qs 2h 
-# => Player's turn: 
-# => Do you want to hit or stay ('h' or 's')?
-# h
-# => Player's hand: Qs 2h Ah 
-# => Do you want to hit or stay ('h' or 's')?
-# h
-# => Player's hand: Qs 2h Ah Qd 
-# => Player busted (hand total: 23)
-# => Dealer wins
-# => Group wins: dealer = 1. player = 0
-
-# New hand
-# => Dealer's up card: Qc
-# => Player's hand: 2s Ah 
-# => Player's turn: 
-# => Do you want to hit or stay ('h' or 's')?
-# h
-# => Player's hand: 2s Ah Qs 
-# => Do you want to hit or stay ('h' or 's')?
-# h
-# => Player's hand: 2s Ah Qs 9c 
-# => Player busted (hand total: 22)
-# => Dealer wins
-# => Group wins: dealer = 2. player = 0
-
-# New hand
-# => Dealer's up card: 9d
-# => Player's hand: 3d Kc 
-# => Player's turn: 
-# => Do you want to hit or stay ('h' or 's')?
-# h
-# => Player's hand: 3d Kc Qh 
-# => Player busted (hand total: 23)
-# => Dealer wins
-# => Group wins: dealer = 3. player = 0
-
-# New hand
-# => Dealer's up card: 8d
-# => Player's hand: 5c 7d 
-# => Player's turn: 
-# => Do you want to hit or stay ('h' or 's')?
-# h
-# => Player's hand: 5c 7d Jd 
-# => Player busted (hand total: 22)
-# => Dealer wins
-# => Group wins: dealer = 4. player = 0
-
-# New hand
-# => Dealer's up card: 2d
-# => Player's hand: 8h Td 
-# => Player's turn: 
-# => Do you want to hit or stay ('h' or 's')?
-# s
-# => Dealer's turn: 
-# => Dealer's hand: 2d Ad 
-# => Dealer takes a card: 
-# => Dealer's hand: 2d Ad Js 
-# => Dealer takes a card: 
-# => Dealer's hand: 2d Ad Js Kd 
-# => Dealer busted (hand total: 23)
-# => Player wins
-# => Group wins: dealer = 4. player = 1
+# => Group wins: dealer = 2. player = 2
 
 # New hand
 # => Dealer's up card: Ad
-# => Player's hand: 2h Tc 
+# => Player's hand: 8h 2c 
 # => Player's turn: 
 # => Do you want to hit or stay ('h' or 's')?
 # h
-# => Player's hand: 2h Tc 3c 
+# => Player's hand: 8h 2c 4c 
 # => Do you want to hit or stay ('h' or 's')?
 # h
-# => Player's hand: 2h Tc 3c 4h 
+# => Player's hand: 8h 2c 4c 5c 
 # => Do you want to hit or stay ('h' or 's')?
 # s
 # => Dealer's turn: 
-# => Dealer's hand: Ad 9s 
+# => Dealer's hand: Ad 9c 
 # => Dealer hand total: 20
 # => Player hand total: 19
 # => Dealer wins
-# => Group wins: dealer = 5. player = 1
+# => Group wins: dealer = 3. player = 2
+
+# New hand
+# => Dealer's up card: 6c
+# => Player's hand: 4s 2s 
+# => Player's turn: 
+# => Do you want to hit or stay ('h' or 's')?
+# h
+# => Player's hand: 4s 2s Ac 
+# => Do you want to hit or stay ('h' or 's')?
+# h
+# => Player's hand: 4s 2s Ac 3s 
+# => Do you want to hit or stay ('h' or 's')?
+# s
+# => Dealer's turn: 
+# => Dealer's hand: 6c 3h 
+# => Dealer takes a card: 
+# => Dealer's hand: 6c 3h 6h 
+# => Dealer takes a card: 
+# => Dealer's hand: 6c 3h 6h 2c 
+# => Dealer hand total: 17
+# => Player hand total: 20
+# => Player wins
+# => Group wins: dealer = 3. player = 3
+
+# New hand
+# => Dealer's up card: 8c
+# => Player's hand: 4h 6c 
+# => Player's turn: 
+# => Do you want to hit or stay ('h' or 's')?
+# h
+# => Player's hand: 4h 6c 3s 
+# => Do you want to hit or stay ('h' or 's')?
+# h
+# => Player's hand: 4h 6c 3s 3c 
+# => Do you want to hit or stay ('h' or 's')?
+# h
+# => Player's hand: 4h 6c 3s 3c Ad 
+# => Do you want to hit or stay ('h' or 's')?
+# s
+# => Dealer's turn: 
+# => Dealer's hand: 8c Qs 
+# => Dealer hand total: 18
+# => Player hand total: 17
+# => Dealer wins
+# => Group wins: dealer = 4. player = 3
+
+# New hand
+# => Dealer's up card: 9h
+# => Player's hand: 9s 3s 
+# => Player's turn: 
+# => Do you want to hit or stay ('h' or 's')?
+# h
+# => Player's hand: 9s 3s 4s 
+# => Do you want to hit or stay ('h' or 's')?
+# h
+# => Player's hand: 9s 3s 4s 6h 
+# => Player busted (hand total: 22)
+# => Dealer wins
+# => Group wins: dealer = 5. player = 3
 # => Dealer wins the group of hands
 # => Play again? ('y' or 'n)
 # n
 # => Thanks for playing! Good bye!
+ 
