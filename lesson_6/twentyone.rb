@@ -1,4 +1,4 @@
-BUST_TOTAL = 21
+MAX_TOTAL_BEFORE_BUST = 21
 TOTAL_BELOW_WHICH_DEALER_MUST_HIT = 17
 NUM_POINTS_TO_WIN = 5
 
@@ -107,10 +107,10 @@ end
 def get_hand_total(hand)
   hand_total = hand.reduce(0) { |total, card| total + card[:value] }
 
-  if hand_total > BUST_TOTAL
+  if hand_total > MAX_TOTAL_BEFORE_BUST
     aces_arr = hand.select { |card| card[:value] == 11 }
     num_aces = aces_arr.size
-    while num_aces > 0 && hand_total > BUST_TOTAL
+    while num_aces > 0 && hand_total > MAX_TOTAL_BEFORE_BUST
       hand_total -= 10
       num_aces -= 1
     end
@@ -135,7 +135,7 @@ def complete_players_hand_to_get_total(player_hand, deck)
       # Sum up all the player cards (and treat aces)
       hand_total = get_hand_total(player_hand)
 
-      busted = hand_total > BUST_TOTAL
+      busted = hand_total > MAX_TOTAL_BEFORE_BUST
     end
 
     break if player_action == 's' || busted
@@ -198,7 +198,7 @@ loop do
     hand_result = 'unresolved'
 
     # Dealer wins if player busted
-    if player_total > BUST_TOTAL
+    if player_total > MAX_TOTAL_BEFORE_BUST
       prompt("Player busted (hand total: #{player_total})")
       hand_result = 'Dealer wins'
     else
@@ -206,7 +206,7 @@ loop do
       dealer_total = complete_dealers_hand_to_get_total(dealer_hand, deck)
 
       # Player wins if dealer busted
-      if dealer_total > BUST_TOTAL
+      if dealer_total > MAX_TOTAL_BEFORE_BUST
         prompt("Dealer busted (hand total: #{dealer_total})")
         hand_result = 'Player wins'
       end
