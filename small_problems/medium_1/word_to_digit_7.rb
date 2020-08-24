@@ -67,3 +67,7 @@ p word_to_digit('Please call me at five Three ZERO EIGHT six seven five three ze
 p word_to_digit('Please call me at five Three ZERO EIGHT six seven five three zero nine. Thanks, Bodine.')
 
 
+# true
+# "Please call me at 5 5 5 1 2 3 4. Thanks."
+# true
+# "Please call me at (530) 867-5309. Thanks, Bodine."
