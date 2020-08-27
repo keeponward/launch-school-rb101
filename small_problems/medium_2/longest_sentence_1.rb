@@ -6,20 +6,7 @@
 
 
 # (Includes Further Exploration parts: preserve puncuation, longest word)
-# prints period at end of longest sentence, finds longest word, longest paragraph
-
-def get_longest_sub_word(word)
-  longest_sub_word = ''
-  word_arr = word.split(/[\W]/)
-  # word_arr = word.split(/[\:\/\.\,\;\(\)\"\']/)
-
-  word_arr.each do |sub_word|
-    if sub_word.length > longest_sub_word.length
-      longest_sub_word = sub_word
-    end
-  end
-  longest_sub_word
-end
+# prints period at end of longest sentence, and finds longest word.
 
 num_words_in_longest_sentence = 0
 num_words_in_this_sentence = 0
@@ -36,14 +23,12 @@ text.split(' ').each do |word|
   num_words_in_this_sentence += 1
   curr_sentence_words << word
 
-  sub_word = get_longest_sub_word(word)
-
-  if sub_word.length > longest_word.length
-    longest_word = sub_word
+  if word.length > longest_word.length
+    longest_word = word
     # puts "New longest word: #{longest_word}"
   end
 
-  if word.match(/[\.\!\?]\B/)
+  if word.match(/[\.\!\?]/)
     if num_words_in_this_sentence > num_words_in_longest_sentence
       num_words_in_longest_sentence = num_words_in_this_sentence
       longest_sentence_words = curr_sentence_words
