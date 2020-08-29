@@ -20,7 +20,10 @@ longest_word = ''
 
 text = File.read('/Users/andywitek/launchschool/downloads/gutenberg.file')
 
-# This regex is intended to split on any of the 3 characters: '.' '!' '?' along with any white spaces that occur immediately following (zero or more).  The split can also occur on consecutive white-spaces (1 or more).  The captured characters (. ! ?) are not thrown away.  They appear in the result array.  They will be used to determine end of sentence below.  They will also be appended to the last word of every longest sentence candidate.
+# This regex is intended to split on any of the 3 characters: '.' '!' '?' along with any white spaces that 
+# occur immediately following (zero or more).  The split can also occur on consecutive white-spaces (1 or more).
+# The captured characters (. ! ?) are not thrown away.  They appear in the result array.  They will be used to
+# determine end of sentence below.  They will also be appended to the last word of every longest sentence candidate.
   text.split(/(\.)\s*|(\!)\s*|(\?)\s*|\s+/).each do |word|
 
   # If word is a sentence ending character
@@ -77,7 +80,7 @@ puts "The longest sentence has #{num_words_in_longest_sentence} words"
 # Further Exploration (paragraphs)
 text = File.read('/Users/andywitek/launchschool/downloads/gutenberg.file')
 
-# Regex pattern (below) empirically determined by looking at (p text).  Intention is to split into paragraphcs
+# Regex pattern (below) empirically determined by looking at (p text).  Intention is to split into paragraphs
 # on 2 or more consecutive pairs of '\r\n'.
 paragraphs = text.split(/(\r\n){2,}/)
 
